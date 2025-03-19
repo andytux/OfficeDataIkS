@@ -1,0 +1,47 @@
+﻿<div class="mb-1">
+	<label>@Label</label>
+	<input class="form-control"
+		   @bind-value="Value"
+		   placeholder="@PlaceHolder"
+		   type="@GetInputText()"
+		   oninput="@OnValueChanged" />
+</div>
+
+@code {
+	[Parameter]
+	public string Label { get; set; } = string.Empty;
+
+	[Parameter]
+	public string Value { get; set; } = string.Empty;
+
+	[Parameter]
+	public string PlaceHolder { get; set; } = string.Empty;
+
+	[Parameter]
+	public bool IsPassword { get; set; } = false;
+
+	[Parameter]
+	public bool ShowPassword { get; set; } = false;
+
+	[Parameter]
+	public EventCallback<string> ValueChanged { get; set; }
+
+	private string InputText = "text";
+
+	private string GetInputText()
+	{
+		return IsPassword ? (ShowPassword ? "text" : "password") : "text";
+	}
+
+	protected override void OnParametersSet()
+	{
+		InputText = GetInputText();
+	}
+
+	private async Task OnValueChanged(ChangeEventArgs e)
+	{
+		Value = e.Value?.ToString() ?? string.Empty;
+		await ValueChanged.InvokeAsync(Value);
+	}
+
+}

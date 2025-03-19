@@ -1,0 +1,8 @@
+﻿@if (!string.IsNullOrEmpty(Message))
+{
+	<p style="color:@(Message.Contains("successful") ? "green" : "red")">@Message</p>
+}
+@code {
+	[Parameter]
+	public string Message { get; set; } = string.Empty;
+}

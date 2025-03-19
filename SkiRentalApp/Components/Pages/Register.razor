@@ -1,0 +1,82 @@
+﻿@page "/register"
+
+@inject EmployeeService EmployeeService
+@inject AuthService AuthService
+@inject NavigationManager NavManager
+@inject AuthStateService AuthStateService
+
+<h3>Register</h3>
+<InfoMessages Message="@Message" />
+
+<div>
+	<InputField Label="Username"
+				PlaceHolder="Enter your username here..."
+				@bind-Value="UserName">
+	</InputField>
+	<InputField Label="Password"
+				PlaceHolder="Enter your password here..."
+				@bind-Value="Password"
+				IsPassword="true"
+				ShowPassword="@ShowPassword">
+	</InputField>
+	<InputField Label="Confirm password"
+				PlaceHolder="Confirm your password here..."
+				@bind-Value="ConfirmPassword"
+				IsPassword="true"
+				ShowPassword="@ShowPassword">
+	</InputField>
+	<div>
+		<InputCheckbox @bind-Value="ShowPassword"></InputCheckbox>
+		<label>Show password</label>
+	</div>
+
+	<div>
+		<button @onclick="RegisterEmployee">Register</button>
+	</div>
+</div>
+
+
+@code {
+	private string Message = string.Empty;
+	private string UserName = string.Empty;
+	private string Password = string.Empty;
+	private string ConfirmPassword = string.Empty;
+	private bool ShowPassword = false;
+
+
+	private async Task RegisterEmployee()
+	{
+		if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Password))
+		{
+			Message = "Username and Password cannot be empty.";
+			return;
+		}
+
+		if (Password != ConfirmPassword)
+		{
+			Message = "Passwords do not match!";
+			return;
+		}
+
+		bool employeeExists = await EmployeeService.EmloyeeAlreadyExistsAsync(UserName);
+		
+		if (employeeExists)
+		{
+			Message = "Username already taken!";
+			return;
+		}
+
+		var newEmployee = new Employee
+			{
+				UserName = UserName
+			};
+
+		string salt = AuthService.GetSaltOfGuid(newEmployee.EmployeeId);
+		newEmployee.PasswordHash = AuthService.GetPasswordHash(Password, salt);
+
+		await EmployeeService.AddEmployeeAsync(newEmployee);
+		Message = "Registration successful! You can now log in.";
+
+		NavManager.NavigateTo($"/login/{UserName}/{Message}");
+	}
+}

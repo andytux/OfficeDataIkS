@@ -1,0 +1,14 @@
+﻿@page "/"
+@page "/home/{UserName}"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, @(string.IsNullOrEmpty(UserName) ? "world" : UserName)!</h1>
+
+Welcome to your new app.
+
+
+@code{
+	[Parameter]
+	public string UserName { get; set; } = string.Empty;
+}

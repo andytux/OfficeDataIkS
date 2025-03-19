@@ -1,0 +1,21 @@
+﻿@inject AuthStateService AuthStateService
+
+@if (AuthStateService.IsLoggedIn)
+{
+	@ChildContent
+}
+else
+{
+	<p>Please <a href="/login">Login</a> first!</p>
+}
+
+@code {
+	[Parameter]
+	public RenderFragment? ChildContent { get; set; }
+
+	protected override void OnInitialized()
+	{
+		AuthStateService.AuthStateChanged += StateHasChanged;
+	}
+
+}

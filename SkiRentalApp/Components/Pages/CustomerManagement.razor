@@ -1,0 +1,77 @@
+﻿@page "/customers"
+@inject CustomerService CustomerService
+@inject AuthStateService AuthStateService
+
+<h3>Customer Management</h3>
+
+<InfoMessages Message="@Message" />
+
+<h4>List of Customers</h4>
+<ProtectedPage>
+	<table class="table table-bordered table-light table-hover">
+		<thead class="table-secondary">
+			<tr>
+				<th>Name</th>
+				<th>Email</th>
+				<th>Phone</th>
+				<th>Birthdate</th>
+				<th>Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var customer in Customers)
+			{
+				<tr>
+					<td>@customer.CustomerName</td>
+					<td>@customer.Email</td>
+					<td>@customer.Phone</td>
+					<td>@customer.BirthDate.ToString("dd-MM-yyyy")</td>
+					<td>
+						<button @onclick="() => DeleteCustomer(customer.CustomerId)">Delete</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+</ProtectedPage>
+
+
+<h4>Add New Customer</h4>
+
+<div>
+	<InputField Label="Name" @bind-Value="NewCustomer.CustomerName" />
+	<InputField Label="Email" @bind-Value="NewCustomer.Email" />
+	<InputField Label="Phone" @bind-Value="NewCustomer.Phone" />
+
+	<label>Birthdate</label>
+	<input class="form-control" type="date" @bind="NewCustomer.BirthDate" />
+</div>
+
+<button @onclick="AddCustomer">Add Customer</button>
+
+@code {
+	private List<CustomerViewModel> Customers = new();
+	private CustomerViewModel NewCustomer = new() { BirthDate = DateTime.UtcNow.AddYears(-18) };
+	private string Message = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		Customers = await CustomerService.GetCustomersAsync();
+	}
+
+	private async Task AddCustomer()
+	{
+		await CustomerService.AddCustomerAsync(NewCustomer);
+		Customers = await CustomerService.GetCustomersAsync();
+		NewCustomer = new CustomerViewModel { BirthDate = DateTime.UtcNow };
+		Message = "Customer added successfully!";
+	}
+
+	private async Task DeleteCustomer(Guid customerId)
+	{
+		await CustomerService.DeleteCustomerAsync(customerId);
+		Customers = await CustomerService.GetCustomersAsync();
+		Message = "Customer deleted successfully!";
+		StateHasChanged();
+	}
+}

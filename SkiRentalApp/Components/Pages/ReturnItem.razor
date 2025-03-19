@@ -1,0 +1,73 @@
+﻿@page "/returnItem"
+@inject RentalService RentalService
+@inject NavigationManager Navigation
+
+<h3>Return an Item</h3>
+
+<ProtectedPage>
+	<InfoMessages Message="@Message" />
+
+	<div>
+		<table class="table table-bordered" style="max-width: 400px;">
+			<tbody>
+				<tr>
+					<td class="text-end">
+						<label>Select Rental:</label>
+					</td>
+					<td>
+
+						<select @bind="SelectedRentalId">
+							<option value="">-- Select --</option>
+							@foreach (var rental in ActiveRentals)
+							{
+								<option value="@rental.RentalId">@($"{rental.CustomerName} - {rental.ItemName} (Rented on {rental.RentalDate:dd-MM-yyyy})")</option>
+							}
+						</select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<button @onclick="ReturnItemAsync">Return</button>
+</ProtectedPage>
+
+@code {
+	private List<RentalViewModel> ActiveRentals = new List<RentalViewModel>();
+	private Guid SelectedRentalId = Guid.Empty;
+	private string Message = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		ActiveRentals = await RentalService.GetActiveRentalsAsync();
+		
+		if (ActiveRentals.Count < 1)
+		{
+			Message = "There no items to return";
+		}
+	}
+
+	private async Task ReturnItemAsync()
+	{
+		if (SelectedRentalId == Guid.Empty)
+		{
+			Message = "Please select a rental to return.";
+			return;
+		}
+
+		bool success = await RentalService.ReturnItemAsync(SelectedRentalId);
+
+		if (success)
+		{
+			Message = "Item successfully returned!";
+			ActiveRentals = await RentalService.GetActiveRentalsAsync();
+			SelectedRentalId = Guid.Empty;
+		}
+		else
+		{
+			Message = "Could not return the item. Try again.";
+		}
+
+		StateHasChanged();
+	}
+}

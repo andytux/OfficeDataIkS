@@ -1,0 +1,90 @@
+﻿@page "/rentItem"
+
+@inject RentalService RentalService
+@inject CustomerService CustomerService
+@inject NavigationManager Navigation
+
+<h3>Rent an Item</h3>
+<ProtectedPage>
+
+	<InfoMessages Message="@Message" />
+
+	<div>
+		<table class="table table-bordered" style="max-width: 400px;">
+			<tbody>
+				<tr>
+					<td>
+						<label>Select Customer:</label>
+					</td>
+					<td>
+						<select @bind="SelectedCustomerId">
+							<option value="">-- Select --</option>
+							@foreach (var customer in Customers)
+							{
+								<option value="@customer.CustomerId">@customer.CustomerName</option>
+							}
+						</select>
+					</td>
+				</tr>
+
+				<tr>
+					<td>
+						<label>Select Item:</label>
+					</td>
+					<td>
+						<select @bind="SelectedItemId">
+							<option value="">-- Select --</option>
+							@foreach (var item in Items)
+							{
+								<option value="@item.ItemId">@item.ItemName</option>
+							}
+						</select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<button @onclick="RentItemAsync">Rent</button>
+</ProtectedPage>
+
+@code {
+	private List<CustomerViewModel> Customers = new();
+	private List<Item> Items = new();
+	private Guid SelectedCustomerId = Guid.Empty;
+	private int SelectedItemId = 0;
+	private string Message = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		Customers = await CustomerService.GetCustomersAsync();
+		Items = await RentalService.GetAvailableItemsAsync();
+	}
+
+	private async Task RentItemAsync()
+	{
+		if (SelectedCustomerId == Guid.Empty || SelectedItemId == 0)
+		{
+			Message = "Please select both a customer and an item.";
+			return;
+		}
+
+		bool success = await RentalService.RentItemAsync(SelectedCustomerId, SelectedItemId);
+
+		if (success)
+		{
+			Message = "Item successfully rented!";
+			SelectedCustomerId = Guid.Empty;
+			SelectedItemId = 0;
+
+			//Lade die liste neu
+			Items = await RentalService.GetAvailableItemsAsync(); 
+		}
+		else
+		{
+			Message = "This item is already rented!";
+		}
+
+		StateHasChanged();
+	}
+}

@@ -1,0 +1,92 @@
+﻿@page "/rentalList"
+@inject RentalService RentalService
+
+<h3>Rental List</h3>
+<ProtectedPage>
+
+	@if (ActiveRentals == null || CompletedRentals == null)
+	{
+		<p>Loading...</p>
+	}
+	else
+	{
+		<h4>Active Rentals</h4>
+		@if (ActiveRentals.Count == 0)
+		{
+			<p>No active rentals.</p>
+		}
+		else
+		{
+			<table class="table table-bordered table-light table-hover">
+				<thead class="table-secondary">
+					<tr>
+						<th>Customer</th>
+						<th>Item</th>
+						<th>Rental Date</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var rental in ActiveRentals)
+					{
+						<tr>
+							<td>@rental.CustomerName</td>
+							<td>@rental.ItemName</td>
+							<td>@rental.RentalDate.ToString("dd-MM-yyyy")</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+
+		<h4>Completed Rentals</h4>
+		@if (CompletedRentals.Count == 0)
+		{
+			<p>No completed rentals.</p>
+		}
+		else
+		{
+			<table class="table table-bordered table-light table-hover">
+				<thead class="table-secondary">
+					<tr>
+						<th>Customer</th>
+						<th>Item</th>
+						<th>Price per day</th>
+						<th>Total price</th>
+						<th>Rental Date</th>
+						<th>Return Date</th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var rental in CompletedRentals)
+					{
+						<tr>
+							<td>@rental.Customer.CustomerName</td>
+							<td>@rental.Item.ItemName</td>
+							<td>@rental.Item.RentalPricePerDay €</td>
+							<td>@GetTotalPrice(rental.RentalDate, rental.ReturnDate.Value, rental.Item.RentalPricePerDay) €</td>
+							<td>@rental.RentalDate.ToString("dd-MM-yyyy")</td>
+							<td>@rental.ReturnDate?.ToString("dd-MM-yyyy")</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+	}
+</ProtectedPage>
+
+@code {
+	private List<RentalViewModel> ActiveRentals = new();
+	private List<Rental> CompletedRentals = new();
+
+	protected override async Task OnInitializedAsync()
+	{
+		ActiveRentals = await RentalService.GetActiveRentalsAsync();
+		CompletedRentals = await RentalService.GetCompletedRentalsAsync();
+	}
+
+	private decimal GetTotalPrice(DateTime rentalDate, DateTime returnDate, decimal pricePerDay)
+	{
+		int daysInUse = (returnDate.Date - rentalDate.Date).Days + 1;
+		return daysInUse * pricePerDay;
+	}
+}

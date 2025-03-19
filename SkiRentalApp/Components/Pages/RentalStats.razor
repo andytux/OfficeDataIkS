@@ -1,0 +1,84 @@
+﻿@page "/rentalStats"
+@inject RentalService RentalService
+
+<h3>Rental Statistics</h3>
+<ProtectedPage>
+
+	<InfoMessages Message="@Message" />
+
+	<table class="table table-bordered" style="max-width: 300px;">
+		<tbody>
+			<tr>
+				<td>
+					<label>Start Date:</label>
+				</td>
+				<td>
+					<input type="date" @bind="StartDate" />
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label>End Date:</label>
+				</td>
+				<td>
+					<input type="date" @bind="EndDate" />
+				</td>
+			</tr>
+
+		</tbody>
+	</table>
+
+	<button @onclick="LoadStats">Load Statistics</button>
+
+	@if (Stats.Any())
+	{
+		<h4>Rental Count by Item</h4>
+		<table class="table table-bordered table-light table-hover">
+			<thead class="table-secondary">
+				<tr>
+					<th>Item</th>
+					<th>Rental Count</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var stat in Stats)
+				{
+					<tr>
+						<td>@stat.ItemName</td>
+						<td>@stat.RentalCount</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+</ProtectedPage>
+
+@code {
+	private DateTime StartDate = DateTime.UtcNow.AddDays(-30);
+	private DateTime EndDate = DateTime.UtcNow;
+	private string Message = string.Empty;
+
+	private List<RentalStatViewModel> Stats = new();
+
+	private async Task LoadStats()
+	{
+		if (StartDate > EndDate)
+		{
+			Message = "Start Date must be before End Date.";
+			return;
+		}
+
+		var rentals = await RentalService.GetRentalsByDateRangeAsync(StartDate, EndDate);
+
+		Stats = rentals
+			.GroupBy(r => r.Item.ItemName)
+			.Select(g => new RentalStatViewModel
+				{
+					ItemName = g.Key,
+					RentalCount = g.Count()
+				})
+			.ToList();
+	}
+
+
+}

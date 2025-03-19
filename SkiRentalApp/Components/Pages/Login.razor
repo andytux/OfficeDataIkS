@@ -1,0 +1,73 @@
+﻿@page "/login"
+@page "/login/{UserName}/{Message}"
+
+@inject EmployeeService EmployeeService
+@inject AuthService AuthService
+@inject NavigationManager NavManager
+@inject AuthStateService AuthStateService
+
+<h3>Login</h3>
+<InfoMessages Message="@Message" />
+
+<div>
+	<InputField Label="Username"
+				PlaceHolder="Enter your username here..."
+				@bind-Value="UserName">
+	</InputField>
+	<InputField Label="Password"
+				PlaceHolder="Enter your password here..."
+				@bind-Value="Password"
+				IsPassword="true"
+				ShowPassword="@ShowPassword">
+	</InputField>
+	<div>
+		<InputCheckbox @bind-Value="ShowPassword"></InputCheckbox>
+		<label>Show password</label>
+	</div>
+
+	<div>
+		<button @onclick="LoginEmployee">Login</button>
+	</div>
+</div>
+
+
+@code {
+	[Parameter]
+	public string UserName { get; set; } = string.Empty;
+	[Parameter]
+	public string Message { get; set; } = string.Empty;
+
+	private string Password = string.Empty;
+	private bool ShowPassword = false;
+
+
+	private async Task LoginEmployee()
+	{
+		var employee = await EmployeeService.GetEmployeeByNameAsync(UserName);
+		
+		if (string.IsNullOrEmpty(UserName) || string.IsNullOrEmpty(Password))
+		{
+			Message = "Enter username and password";
+		}
+
+		if (employee == null)
+		{
+			Message = "Employee not found!";
+			return;
+		}
+
+		string salt = AuthService.GetSaltOfGuid(employee.EmployeeId);
+		bool isValid = AuthService.VerifyPassword(Password, employee.PasswordHash, salt);
+
+		if (isValid)
+		{
+			AuthStateService.Login(employee.UserName, employee.EmployeeId);
+			NavManager.NavigateTo($"/home/{UserName}");
+		}
+		else
+		{
+			Message = "Invalid username or password!";
+		}
+	}
+}
+		
