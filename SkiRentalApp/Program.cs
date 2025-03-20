@@ -24,8 +24,7 @@ var app = builder.Build();
 using(var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var authService = scope.ServiceProvider.GetRequiredService<AuthService>();
-    AppDbContext.SeedDatabase(dbContext, authService);
+    AppDbContext.SeedDatabase(dbContext);
 }
 
 // Configure the HTTP request pipeline.

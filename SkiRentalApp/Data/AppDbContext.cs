@@ -53,8 +53,14 @@ namespace SkiRentalApp.Data
 			base.OnModelCreating(modelBuilder);
 		}
 
-		public static void SeedDatabase(AppDbContext dbContext, AuthService authService)
+		/// <summary>
+		/// Fügt Testdaten in die Datenbank ein
+		/// </summary>
+		/// <param name="dbContext"></param>
+		/// <param name="authService"></param>
+		public static void SeedDatabase(AppDbContext dbContext)
 		{
+			//für die käufer
 			if (!dbContext.Customers.Any())
 			{
 				var customers = new List<Customer>
@@ -65,6 +71,7 @@ namespace SkiRentalApp.Data
 				dbContext.Customers.AddRange(customers);
 			}
 
+			//für die Kategorien
 			if (!dbContext.Categories.Any())
 			{
 				var categories = new List<Category>
@@ -77,6 +84,7 @@ namespace SkiRentalApp.Data
 				dbContext.SaveChanges();
 			}
 
+			//für Artikelstatuses
 			if (!dbContext.ItemStatuses.Any())
 			{
 				var availableStatus = new ItemStatus { StatusName = "Available" };
@@ -86,6 +94,7 @@ namespace SkiRentalApp.Data
 				dbContext.SaveChanges();
 			}
 
+			//für Artikel
 			if (!dbContext.Items.Any())
 			{
 				var skiCategory = dbContext.Categories.FirstOrDefault(c => c.CategoryName == "Ski");

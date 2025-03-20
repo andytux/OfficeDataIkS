@@ -77,7 +77,7 @@
 			SelectedCustomerId = Guid.Empty;
 			SelectedItemId = 0;
 
-			//Lade die liste neu
+			//Lade die liste neu um sie aktuell zu halten
 			Items = await RentalService.GetAvailableItemsAsync(); 
 		}
 		else

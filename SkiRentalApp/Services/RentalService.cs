@@ -14,7 +14,12 @@ namespace SkiRentalApp.Services
 			this.dbContext = dbContext;
 		}
 
-		// Artikel vermieten
+		/// <summary>
+		/// Artikel vermieten
+		/// </summary>
+		/// <param name="customerId"></param>
+		/// <param name="itemId"></param>
+		/// <returns></returns>
 		public async Task<bool> RentItemAsync(Guid customerId, int itemId)
 		{
 			bool isAlreadyRented = await dbContext.Rentals.AnyAsync(r => r.ItemId == itemId && r.ReturnDate == null);
@@ -41,7 +46,11 @@ namespace SkiRentalApp.Services
 			return true;
 		}
 
-		// Artikel zurückgeben
+		/// <summary>
+		/// Artikel zurückgeben
+		/// </summary>
+		/// <param name="rentalId"></param>
+		/// <returns></returns>
 		public async Task<bool> ReturnItemAsync(Guid rentalId)
 		{
 			var rental = await dbContext.Rentals.Include(r => r.Item).FirstOrDefaultAsync(r => r.RentalId == rentalId);
@@ -65,7 +74,10 @@ namespace SkiRentalApp.Services
 			return true;
 		}
 
-		// Alle aktiven Mietvorgänge abrufen
+		/// <summary>
+		/// Alle aktiven Mietvorgänge abrufen
+		/// </summary>
+		/// <returns></returns>
 		public async Task<List<RentalViewModel>> GetActiveRentalsAsync()
 		{
 			return await dbContext.Rentals
@@ -81,6 +93,12 @@ namespace SkiRentalApp.Services
 				}).ToListAsync();
 		}
 
+		/// <summary>
+		/// Gibt den Artikel inklusive der Anzahl der Verleihungen für einen bestimmten Zeitraum zurück
+		/// </summary>
+		/// <param name="startDate"></param>
+		/// <param name="endDate"></param>
+		/// <returns></returns>
 		public async Task<List<Rental>> GetRentalsByDateRangeAsync(DateTime startDate, DateTime endDate)
 		{
 			return await dbContext.Rentals
@@ -90,6 +108,10 @@ namespace SkiRentalApp.Services
 				.ToListAsync();
 		}
 
+		/// <summary>
+		/// Gibt Artikel die ausgeliehen werden können zurück
+		/// </summary>
+		/// <returns></returns>
 		public async Task<List<Item>> GetAvailableItemsAsync()
 		{
 			return await dbContext.Items
@@ -97,6 +119,10 @@ namespace SkiRentalApp.Services
 				.ToListAsync();
 		}
 
+		/// <summary>
+		/// Alle ausgeliehenen Artikel zurückgeben
+		/// </summary>
+		/// <returns></returns>
 		public async Task<List<Rental>> GetCompletedRentalsAsync()
 		{
 			return await dbContext.Rentals

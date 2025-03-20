@@ -14,12 +14,22 @@ namespace SkiRentalApp.Services
 			this.dbContext = dbContext;
 		}
 
+		/// <summary>
+		/// Speichert Käufer in Datenbank
+		/// </summary>
+		/// <param name="customer"></param>
+		/// <returns></returns>
 		public async Task AddCustomerAsync(Customer customer)
 		{
 			dbContext.Customers.Add(customer);
 			await dbContext.SaveChangesAsync();
 		}
-
+		
+		/// <summary>
+		/// Löscht Käufer aus Datenbank per Id
+		/// </summary>
+		/// <param name="customerId"></param>
+		/// <returns></returns>
 		public async Task DeleteCustomerAsync(Guid customerId)
 		{
 			var customer = await dbContext.Customers.FindAsync(customerId);
@@ -31,6 +41,10 @@ namespace SkiRentalApp.Services
 			}
 		}
 
+		/// <summary>
+		/// Gibt alle Käufer zurück
+		/// </summary>
+		/// <returns></returns>
 		public async Task<List<CustomerViewModel>> GetCustomersAsync()
 		{
 			return await dbContext.Customers
@@ -44,6 +58,11 @@ namespace SkiRentalApp.Services
 				}).ToListAsync();
 		}
 
+		/// <summary>
+		/// Speichert den Customer aus dem Viewmodel in die Datenbank ab
+		/// </summary>
+		/// <param name="customerViewModel"></param>
+		/// <returns></returns>
 		public async Task AddCustomerAsync(CustomerViewModel customerViewModel)
 		{
 			var customer = new Customer
