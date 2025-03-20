@@ -8,5 +8,6 @@
 		public decimal PricePerDay { get; set; }
 		public DateTime RentalDate { get; set; }
 		public DateTime? ReturnDate { get; set; }
+		public string EmployeeName { get; set; }
 	}
 }

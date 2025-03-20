@@ -17,7 +17,7 @@
 					<td>
 
 						<select @bind="SelectedRentalId">
-							<option value="">-- Select --</option>
+							<option value="@Guid.Empty">-- Select --</option>
 							@foreach (var rental in ActiveRentals)
 							{
 								<option value="@rental.RentalId">@($"{rental.CustomerName} - {rental.ItemName} (Rented on {rental.RentalDate:dd-MM-yyyy})")</option>

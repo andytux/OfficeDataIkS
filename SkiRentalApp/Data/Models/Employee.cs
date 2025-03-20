@@ -13,5 +13,7 @@ namespace SkiRentalApp.Data.Models
 
         [Required]
         public string PasswordHash { get; set; }
-    }
+
+		public ICollection<Rental> Rentals { get; set; } = new List<Rental>();
+	}
 }

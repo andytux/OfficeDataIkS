@@ -12,8 +12,8 @@ using SkiRentalApp.Data;
 namespace SkiRentalApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250319163602_FixedNamesOfModels")]
-    partial class FixedNamesOfModels
+    [Migration("20250320084355_FixedRelations")]
+    partial class FixedRelations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -163,6 +163,9 @@ namespace SkiRentalApp.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
@@ -175,6 +178,8 @@ namespace SkiRentalApp.Migrations
                     b.HasKey("RentalId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("ItemId");
 
@@ -208,6 +213,12 @@ namespace SkiRentalApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SkiRentalApp.Data.Models.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SkiRentalApp.Data.Models.Item", "Item")
                         .WithMany()
                         .HasForeignKey("ItemId")
@@ -215,6 +226,8 @@ namespace SkiRentalApp.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+
+                    b.Navigation("Employee");
 
                     b.Navigation("Item");
                 });

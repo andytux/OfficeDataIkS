@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SkiRentalApp.Migrations
 {
     /// <inheritdoc />
-    public partial class FinalFixes : Migration
+    public partial class FixedRelations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,7 +17,7 @@ namespace SkiRentalApp.Migrations
                 {
                     CategoryId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    CategoryName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,7 +29,7 @@ namespace SkiRentalApp.Migrations
                 columns: table => new
                 {
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
                     BirthDate = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -58,7 +58,7 @@ namespace SkiRentalApp.Migrations
                 {
                     StatusId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    StatusName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -71,7 +71,7 @@ namespace SkiRentalApp.Migrations
                 {
                     ItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ItemName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     RentalPricePerDay = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     RentalCount = table.Column<int>(type: "int", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
@@ -101,6 +101,7 @@ namespace SkiRentalApp.Migrations
                     RentalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ItemId = table.Column<int>(type: "int", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     RentalDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -114,6 +115,12 @@ namespace SkiRentalApp.Migrations
                         principalColumn: "CustomerId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_Rentals_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalTable: "Employees",
+                        principalColumn: "EmployeeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Rentals_Items_ItemId",
                         column: x => x.ItemId,
                         principalTable: "Items",
@@ -122,9 +129,9 @@ namespace SkiRentalApp.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_Name",
+                name: "IX_Categories_CategoryName",
                 table: "Categories",
-                column: "Name",
+                column: "CategoryName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -144,15 +151,20 @@ namespace SkiRentalApp.Migrations
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemStatuses_Name",
+                name: "IX_ItemStatuses_StatusName",
                 table: "ItemStatuses",
-                column: "Name",
+                column: "StatusName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Rentals_CustomerId",
                 table: "Rentals",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rentals_EmployeeId",
+                table: "Rentals",
+                column: "EmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Rentals_ItemId",
@@ -164,13 +176,13 @@ namespace SkiRentalApp.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Employees");
-
-            migrationBuilder.DropTable(
                 name: "Rentals");
 
             migrationBuilder.DropTable(
                 name: "Customers");
+
+            migrationBuilder.DropTable(
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "Items");

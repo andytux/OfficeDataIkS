@@ -20,7 +20,7 @@ namespace SkiRentalApp.Services
 		/// <param name="customerId"></param>
 		/// <param name="itemId"></param>
 		/// <returns></returns>
-		public async Task<bool> RentItemAsync(Guid customerId, int itemId)
+		public async Task<bool> RentItemAsync(Guid customerId, int itemId, Guid employeeId)
 		{
 			bool isAlreadyRented = await dbContext.Rentals.AnyAsync(r => r.ItemId == itemId && r.ReturnDate == null);
 
@@ -38,12 +38,20 @@ namespace SkiRentalApp.Services
 			{
 				CustomerId = customerId,
 				ItemId = itemId,
+				EmployeeId = employeeId,
 				RentalDate = DateTime.UtcNow
 			};
+			try
+			{
 
 			dbContext.Rentals.Add(rental);
 			await dbContext.SaveChangesAsync();
 			return true;
+			}
+			catch (Exception ex)
+			{
+				return false;
+			}
 		}
 
 		/// <summary>
@@ -81,6 +89,7 @@ namespace SkiRentalApp.Services
 		public async Task<List<RentalViewModel>> GetActiveRentalsAsync()
 		{
 			return await dbContext.Rentals
+				.Include(r => r.Employee)
 				.Where(r => r.ReturnDate == null)
 				.Select(r => new RentalViewModel
 				{
@@ -89,7 +98,8 @@ namespace SkiRentalApp.Services
 					ItemName = r.Item.ItemName,
 					PricePerDay = r.Item.RentalPricePerDay,
 					RentalDate = r.RentalDate,
-					ReturnDate = r.ReturnDate
+					ReturnDate = r.ReturnDate,
+					EmployeeName = r.Employee.UserName
 				}).ToListAsync();
 		}
 
@@ -99,12 +109,15 @@ namespace SkiRentalApp.Services
 		/// <param name="startDate"></param>
 		/// <param name="endDate"></param>
 		/// <returns></returns>
-		public async Task<List<Rental>> GetRentalsByDateRangeAsync(DateTime startDate, DateTime endDate)
+		public async Task<List<RentalViewModel>> GetRentalsByDateRangeAsync(DateTime startDate, DateTime endDate)
 		{
 			return await dbContext.Rentals
 				.Include(r => r.Item)
-				.Include(r => r.Customer)
 				.Where(r => r.RentalDate >= startDate && r.RentalDate <= endDate)
+				.Select(r => new RentalViewModel
+				{
+					ItemName = r.Item.ItemName,
+				})
 				.ToListAsync();
 		}
 
@@ -112,10 +125,15 @@ namespace SkiRentalApp.Services
 		/// Gibt Artikel die ausgeliehen werden können zurück
 		/// </summary>
 		/// <returns></returns>
-		public async Task<List<Item>> GetAvailableItemsAsync()
+		public async Task<List<ItemViewModel>> GetAvailableItemsAsync()
 		{
 			return await dbContext.Items
-				.Where(i => !dbContext.Rentals.Any(r => r.ItemId == i.ItemId && r.ReturnDate == null))
+				.Where(i => !dbContext.Rentals.Any(r => r.ItemId == i.ItemId && r.ReturnDate == null)).Select(r => new ItemViewModel
+				{
+					ItemId = r.ItemId,
+					ItemName = r.ItemName,
+					RentalPricePerDay = r.RentalPricePerDay
+				})
 				.ToListAsync();
 		}
 
@@ -123,12 +141,23 @@ namespace SkiRentalApp.Services
 		/// Alle ausgeliehenen Artikel zurückgeben
 		/// </summary>
 		/// <returns></returns>
-		public async Task<List<Rental>> GetCompletedRentalsAsync()
+		public async Task<List<RentalViewModel>> GetCompletedRentalsAsync()
 		{
 			return await dbContext.Rentals
 				.Include(r => r.Customer)
 				.Include(r => r.Item)
+				.Include(r=> r.Employee)
 				.Where(r => r.ReturnDate != null)
+				.Select(r => new RentalViewModel
+				{
+					CustomerName = r.Customer.CustomerName,
+					ItemName = r.Item.ItemName,
+					RentalId= r.RentalId,
+					ReturnDate = r.ReturnDate,
+					RentalDate= r.RentalDate,
+					PricePerDay = r.Item.RentalPricePerDay,
+					EmployeeName = r.Employee.UserName
+				})
 				.ToListAsync();
 		}
 	}

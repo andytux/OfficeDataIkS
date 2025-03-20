@@ -12,8 +12,8 @@ using SkiRentalApp.Data;
 namespace SkiRentalApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250319113407_FinalFixes")]
-    partial class FinalFixes
+    [Migration("20250320180822_OneToManyRental")]
+    partial class OneToManyRental
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,14 +33,14 @@ namespace SkiRentalApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("CategoryName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.HasKey("CategoryId");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("CategoryName")
                         .IsUnique();
 
                     b.ToTable("Categories");
@@ -55,15 +55,15 @@ namespace SkiRentalApp.Migrations
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
@@ -108,7 +108,7 @@ namespace SkiRentalApp.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("ItemName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -141,14 +141,14 @@ namespace SkiRentalApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StatusId"));
 
-                    b.Property<string>("Name")
+                    b.Property<string>("StatusName")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.HasKey("StatusId");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("StatusName")
                         .IsUnique();
 
                     b.ToTable("ItemStatuses");
@@ -163,6 +163,9 @@ namespace SkiRentalApp.Migrations
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("EmployeeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
@@ -175,6 +178,8 @@ namespace SkiRentalApp.Migrations
                     b.HasKey("RentalId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("EmployeeId");
 
                     b.HasIndex("ItemId");
 
@@ -208,6 +213,12 @@ namespace SkiRentalApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SkiRentalApp.Data.Models.Employee", "Employee")
+                        .WithMany("Rentals")
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("SkiRentalApp.Data.Models.Item", "Item")
                         .WithMany()
                         .HasForeignKey("ItemId")
@@ -216,12 +227,19 @@ namespace SkiRentalApp.Migrations
 
                     b.Navigation("Customer");
 
+                    b.Navigation("Employee");
+
                     b.Navigation("Item");
                 });
 
             modelBuilder.Entity("SkiRentalApp.Data.Models.Category", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("SkiRentalApp.Data.Models.Employee", b =>
+                {
+                    b.Navigation("Rentals");
                 });
 
             modelBuilder.Entity("SkiRentalApp.Data.Models.ItemStatus", b =>

@@ -1,0 +1,166 @@
+Projektbeschreibung
+
+SkiRentalApp ist eine Software zur Verwaltung eines Ski-Verleihsystems. Das System ermöglicht das Verleihen und Zurückgeben von Artikeln durch registrierte Mitarbeiter. Es enthält Module für die Authentifizierung, Kundenverwaltung, Mietverwaltung und Statistik.
+
+Hauptfunktionen.
+
+Mitarbeiter-Login mit Benutzername & Passwort (gespeichert als Hash)
+
+Kundenverwaltung (Hinzufügen, Löschen von Kunden)
+
+Artikelverwaltung mit Kategorien & Status (Verfügbar/Verliehen)
+
+Mietverwaltung für den Verleih & die Rückgabe von Artikeln
+
+Statistiken zur Analyse der Verleihhäufigkeit
+
+
+Designdokumentation
+
+Technische Umsetzung fachlicher Anforderungen
+
+Login: SHA-256 Hashing inclusive "salt" aus den ersten 8 Zeichen der "Guid" für sichere Speicherung von Passwörtern
+
+Mietlogik: Artikel kann nur vermietet werden, wenn er als „Verfügbar“ markiert ist
+
+Statistik: Anzahl der Vermietungen eines Artikels über einen Zeitraum
+
+DB-Design (siehe ER-Diagramm)
+
+Employees: Enthält Login-Daten für Mitarbeiter
+
+Customers: Speichert Kundendaten
+
+Items: Enthält Artikel mit Mietpreis und Status
+
+Categories: Kategorisierung der Artikel
+
+ItemStatuses: Status eines Artikels (Verfügbar/Verliehen)
+
+Rentals: Speichert aktive & abgeschlossene Mietvorgänge
+
+
+Namenskonventionen
+
+Tabellen in Singular (Employee, Customer, Item)
+
+Fremdschlüssel als XYZId (EmployeeId, CustomerId)
+
+Boolean-Werte als IsAvailable, IsActive
+
+
+Inline-Source-Dokumentation
+
+Der Code ist mit Kommentaren versehen, um Funktionen und Methoden zu erklären. Wichtige dokumentierte Klassen:
+
+RentalService.cs → Methoden für Verleih und Rückgabe
+
+AuthService.cs → Hashing und Authentifizierung
+
+CustomerService.cs → Verwaltung von Kunden
+
+
+Schnittstellenbeschreibung
+
+Login-Funktion
+
+Input: string userName
+
+Output: Employee-Objekt oder null
+
+Fehlermöglichkeiten: Benutzername existiert nicht
+
+
+Mietvorgang
+
+Input: customerId, itemId
+
+Output: true (Erfolg) oder false (Fehler)
+
+Fehlermöglichkeiten: Artikel ist bereits vermietet
+
+
+Input: rentalId
+
+Output: true oder false
+
+Fehlermöglichkeiten: Artikel wurde nicht vermietet oder bereits zurückgegeben
+
+
+Technische Dokumentation
+
+Architektur
+
+Datenbank: SQL Server mit Entity Framework Core
+
+Backend: ASP.NET Core
+
+Frontend: Blazor mit Razor Components
+
+Authentifizierung: SHA-256 gehashte und gesaltete Passwörter
+
+
+Externe Komponenten & Abhängigkeiten
+
+Entity Framework Core für Datenbankverwaltung
+
+Blazor & Razor Components für UI
+
+SQL Server als relationale Datenbank
+
+
+Mögliche Probleme & Lösungen
+
+Doppelverleih eines Artikels → Lösung: RentItemAsync prüft Status
+
+Fehlender Benutzername beim Login → Lösung: string.IsNullOrEmpty(UserName)
+
+Emailverifizierung funktioniert nihct weil es direkt auf der Seite gerendert wird. -> Lösung: es könnte eine Methode erstellt werden, die das überprüft
+
+
+Testdokumentation
+
+Gewählter Testbereich: Login-Funktion
+
+Testfall : Erfolgreicher Login
+
+Voraussetzung: Benutzer existiert
+
+Testschritte : Benutzername & Passwort eingeben, auf Login klicken
+
+Erwartetes Ergebnis: Erfolgreiche Authentifizierung
+
+Ergebnis : Bestanden
+
+
+Testfall: Falsches Passwort
+
+Voraussetzung:Benutzer existiert
+
+Testschritte: Benutzername korrekt, falsches Passwort
+
+Erwartetes Ergebnis: Fehlermeldung „Invalid username or password“
+
+Ergebnis: Bestanden
+
+
+Testfall: Nicht existierender Benutzer
+
+Voraussetzung: Benutzer nicht registriert
+
+Testschritte: Nicht existierenden Benutzernamen eingeben
+
+Erwartetes Ergebnis: Fehlermeldung „User not found“
+
+Ergebnis: Bestanden
+
+
+Testfall: Groß-/Kleinschreibung
+
+Voraussetzung: Benutzer Andy existiert
+
+Testschritte: ANDY eingeben
+
+Erwartetes Ergebnis: Falls Case-Sensitive, Fehlermeldung
+
+Ergebnis: Kein Fehler, da die DB nicht Case-sensitive ist, es bräuchte noch eine eigene Methode um sicherzustellen dass es case-sensitive ist

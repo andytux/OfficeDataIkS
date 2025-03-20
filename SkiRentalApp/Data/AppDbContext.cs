@@ -50,6 +50,13 @@ namespace SkiRentalApp.Data
 				.Property(i => i.StatusId)
 				.HasDefaultValue(1);
 
+			// 1:n Beziehung 
+			modelBuilder.Entity<Rental>()
+				.HasOne(r => r.Employee) // ein Rental kann nur einen Mitarbeiter haben
+				.WithMany(e => e.Rentals) //Ein Mitarbeiter kann mehrere Rentals haben
+				.HasForeignKey(r => r.EmployeeId)
+				.OnDelete(DeleteBehavior.Restrict);
+
 			base.OnModelCreating(modelBuilder);
 		}
 

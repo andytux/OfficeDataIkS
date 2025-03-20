@@ -18,9 +18,6 @@ namespace SkiRentalApp.Data.Models
         public decimal RentalPricePerDay { get; set; }
 
         [Required]
-        public int RentalCount { get; set; } = 0;
-
-        [Required]
         public int CategoryId { get; set; }
 
         [ForeignKey("CategoryId")]

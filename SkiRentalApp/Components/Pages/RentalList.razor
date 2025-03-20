@@ -23,6 +23,7 @@
 						<th>Customer</th>
 						<th>Item</th>
 						<th>Rental Date</th>
+						<th>Employee</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -32,6 +33,7 @@
 							<td>@rental.CustomerName</td>
 							<td>@rental.ItemName</td>
 							<td>@rental.RentalDate.ToString("dd-MM-yyyy")</td>
+							<td>@rental.EmployeeName</td>
 						</tr>
 					}
 				</tbody>
@@ -51,21 +53,27 @@
 						<th>Customer</th>
 						<th>Item</th>
 						<th>Price per day</th>
+						<th>Days</th>
 						<th>Total price</th>
 						<th>Rental Date</th>
 						<th>Return Date</th>
+						<th>Employee</th>
 					</tr>
 				</thead>
 				<tbody>
 					@foreach (var rental in CompletedRentals)
 					{
+						GetTotalDaysAndPrice(rental);
+
 						<tr>
-							<td>@rental.Customer.CustomerName</td>
-							<td>@rental.Item.ItemName</td>
-							<td>@rental.Item.RentalPricePerDay €</td>
-							<td>@GetTotalPrice(rental.RentalDate, rental.ReturnDate.Value, rental.Item.RentalPricePerDay) €</td>
+							<td>@rental.CustomerName</td>
+							<td>@rental.ItemName</td>
+							<td>@rental.PricePerDay €</td>
+							<td>@TotalDays</td>
+							<td>@TotalPrice €</td>
 							<td>@rental.RentalDate.ToString("dd-MM-yyyy")</td>
 							<td>@rental.ReturnDate?.ToString("dd-MM-yyyy")</td>
+							<td>@rental.EmployeeName</td>
 						</tr>
 					}
 				</tbody>
@@ -76,7 +84,10 @@
 
 @code {
 	private List<RentalViewModel> ActiveRentals = new();
-	private List<Rental> CompletedRentals = new();
+	private List<RentalViewModel> CompletedRentals = new();
+
+	private int TotalDays = 0;
+	private decimal TotalPrice = 0.00m;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -84,9 +95,13 @@
 		CompletedRentals = await RentalService.GetCompletedRentalsAsync();
 	}
 
-	private decimal GetTotalPrice(DateTime rentalDate, DateTime returnDate, decimal pricePerDay)
+
+	private void GetTotalDaysAndPrice(RentalViewModel rental)
 	{
-		int daysInUse = (returnDate.Date - rentalDate.Date).Days + 1;
-		return daysInUse * pricePerDay;
+		if (rental.ReturnDate.HasValue)
+		{
+			TotalDays = (rental.ReturnDate.Value.Date - rental.RentalDate.Date).Days + 1;
+			TotalPrice = TotalDays * rental.PricePerDay;
+		}
 	}
 }

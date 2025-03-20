@@ -71,7 +71,7 @@
 		var rentals = await RentalService.GetRentalsByDateRangeAsync(StartDate, EndDate);
 
 		Stats = rentals
-			.GroupBy(r => r.Item.ItemName)
+			.GroupBy(r => r.ItemName)
 			.Select(g => new RentalStatViewModel
 				{
 					ItemName = g.Key,

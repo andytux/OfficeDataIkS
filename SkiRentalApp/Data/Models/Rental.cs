@@ -22,8 +22,14 @@ namespace SkiRentalApp.Data.Models
         public Item Item { get; set; }
 
         [Required]
+		public Guid EmployeeId { get; set; }
+
+        [ForeignKey("EmployeeId")]
+        public Employee? Employee { get; set; }
+
+		[Required]
         public DateTime RentalDate { get; set; }
 
-        public DateTime? ReturnDate { get; set; }
+        public DateTime? ReturnDate { get; set; } = null;
     }
 }
