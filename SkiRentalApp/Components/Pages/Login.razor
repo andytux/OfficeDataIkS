@@ -61,8 +61,8 @@
 
 		if (isValid)
 		{
-			AuthStateService.Login(employee.UserName, employee.EmployeeId);
-			NavManager.NavigateTo($"/home/{UserName}");
+			await AuthStateService.Login(employee.UserName, employee.EmployeeId);
+			NavManager.NavigateTo($"/");
 		}
 		else
 		{

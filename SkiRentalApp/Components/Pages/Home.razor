@@ -1,14 +1,17 @@
 ﻿@page "/"
-@page "/home/{UserName}"
+
+@inject AuthStateService AuthStateService
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, @(string.IsNullOrEmpty(UserName) ? "world" : UserName)!</h1>
+<h1>Hello, @(string.IsNullOrEmpty(AuthStateService.UserName) ? "world" : AuthStateService.UserName)!</h1>
 
 Welcome to your new app.
 
 
 @code{
-	[Parameter]
-	public string UserName { get; set; } = string.Empty;
+	protected override void OnInitialized()
+	{
+		AuthStateService.AuthStateChanged += StateHasChanged;
+	}
 }

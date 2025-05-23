@@ -8,24 +8,35 @@
         <NavMenu />
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            @if (AuthStateService.IsLoggedIn)
-            {
-                <button @onclick="Logout">Logout</button>
-            }
-            else
-            {
-                <button @onclick="Login">Login</button>
-            }
+    @if (!isInitialized)
+    {
+        <p>initializing AuthState...</p>
+    }
+    else
+    {
 
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+        <main>
+            <div class="top-row px-4">
+                @if (AuthStateService.IsLoggedIn)
+                {
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+                    <p class="mt-2 m-2">Logged in as: @AuthStateService.UserName </p>
+                    <button @onclick="Logout">Logout</button>
+
+                }
+                else
+                {
+                    <button @onclick="Login">Login</button>
+                }
+
+                <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    }
 </div>
 
 <div id="blazor-error-ui">
@@ -36,9 +47,25 @@
 
 
 @code {
-    private void Logout()
+    private bool hasRendered = false;
+    private bool isInitialized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        AuthStateService.Logout();
+        if (firstRender && !hasRendered)
+        {
+            await AuthStateService.InitializeAuthState();
+            hasRendered = true;
+            isInitialized = true;
+
+            StateHasChanged();
+        }
+        AuthStateService.AuthStateChanged += StateHasChanged;
+    }
+
+    private async Task Logout()
+    {
+        await AuthStateService.Logout();
         NavManager.NavigateTo("/login");
     }
 
